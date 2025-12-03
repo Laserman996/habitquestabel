@@ -21,6 +21,7 @@ interface AppContextType {
   deleteFriend: (id: string) => void;
   toggleTheme: () => void;
   getHabitById: (id: string) => Habit | undefined;
+  updateDisplayName: (name: string) => void;
 }
 
 const AppContext = createContext<AppContextType | null>(null);
@@ -203,6 +204,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }));
   }, []);
 
+  const updateDisplayName = useCallback((name: string) => {
+    setState(prev => ({
+      ...prev,
+      userStats: { ...prev.userStats, displayName: name },
+    }));
+  }, []);
+
   const getHabitById = useCallback((id: string) => {
     return state.habits.find(h => h.id === id);
   }, [state.habits]);
@@ -224,6 +232,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       deleteFriend,
       toggleTheme,
       getHabitById,
+      updateDisplayName,
     }}>
       {children}
     </AppContext.Provider>

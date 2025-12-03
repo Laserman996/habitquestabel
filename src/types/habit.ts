@@ -29,6 +29,7 @@ export interface UserStats {
   currentLevelXP: number;
   unlockedRewards: string[];
   title: string;
+  displayName: string;
 }
 
 export interface Friend {
