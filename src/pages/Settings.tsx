@@ -1,14 +1,22 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Sun, Moon, Palette, Shield, Zap, Award, RotateCcw, Info } from 'lucide-react';
+import { Sun, Moon, Palette, Shield, Zap, User, Info } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { Layout } from '@/components/layout/Layout';
 import { RewardsList } from '@/components/stats/RewardsList';
 import { LevelProgress } from '@/components/stats/LevelProgress';
+import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
 const Settings = () => {
-  const { theme, toggleTheme, userStats, habits } = useApp();
+  const { theme, toggleTheme, userStats, habits, updateDisplayName } = useApp();
+  const [nameInput, setNameInput] = useState(userStats.displayName);
+
+  const handleNameSave = () => {
+    updateDisplayName(nameInput);
+    toast.success('Display name updated!');
+  };
 
   return (
     <Layout>
@@ -26,6 +34,41 @@ const Settings = () => {
 
         {/* Level Progress */}
         <LevelProgress />
+
+        {/* Display Name */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.05 }}
+          className="p-6 rounded-2xl bg-card border border-border"
+        >
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
+              <User className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <h2 className="font-semibold">Display Name</h2>
+              <p className="text-sm text-muted-foreground">What should we call you?</p>
+            </div>
+          </div>
+
+          <div className="flex gap-2">
+            <Input
+              value={nameInput}
+              onChange={(e) => setNameInput(e.target.value)}
+              placeholder="Enter your name..."
+              className="flex-1"
+            />
+            <motion.button
+              onClick={handleNameSave}
+              className="px-4 py-2 rounded-xl bg-primary text-primary-foreground font-medium"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              Save
+            </motion.button>
+          </div>
+        </motion.div>
 
         {/* Theme Toggle */}
         <motion.div

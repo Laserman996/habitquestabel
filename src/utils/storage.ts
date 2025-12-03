@@ -10,6 +10,7 @@ const getDefaultState = (): AppState => ({
     currentLevelXP: 0,
     unlockedRewards: [],
     title: 'Beginner',
+    displayName: '',
   },
   friends: [],
   theme: 'dark',
