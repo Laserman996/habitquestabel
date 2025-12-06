@@ -3,6 +3,7 @@ import { AppState, Habit, Friend, UserStats } from '@/types/habit';
 import { loadState, saveState, generateId, getTitleForLevel } from '@/utils/storage';
 import { addXP, XP_PER_COMPLETION, getXPForStreak } from '@/utils/xp';
 import { getToday, getCurrentStreak, isHabitDueToday } from '@/utils/dates';
+import { useCompletionSpeedWarning } from '@/hooks/useCompletionSpeedWarning';
 import confetti from 'canvas-confetti';
 
 interface AppContextType {
@@ -22,6 +23,7 @@ interface AppContextType {
   toggleTheme: () => void;
   getHabitById: (id: string) => Habit | undefined;
   updateDisplayName: (name: string) => void;
+  trackCompletionSpeed: () => void;
 }
 
 const AppContext = createContext<AppContextType | null>(null);
@@ -36,6 +38,7 @@ export const useApp = () => {
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [state, setState] = useState<AppState>(loadState);
+  const { trackCompletion } = useCompletionSpeedWarning();
 
   // Apply theme on mount and changes
   useEffect(() => {
@@ -233,6 +236,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       toggleTheme,
       getHabitById,
       updateDisplayName,
+      trackCompletionSpeed: trackCompletion,
     }}>
       {children}
     </AppContext.Provider>

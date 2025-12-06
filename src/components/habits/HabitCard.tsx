@@ -22,7 +22,7 @@ interface HabitCardProps {
 }
 
 export const HabitCard = ({ habit, index }: HabitCardProps) => {
-  const { toggleHabitCompletion, userStats } = useApp();
+  const { toggleHabitCompletion, trackCompletionSpeed } = useApp();
   
   const today = getToday();
   const isDueToday = isHabitDueToday(habit);
@@ -65,7 +65,10 @@ export const HabitCard = ({ habit, index }: HabitCardProps) => {
           {/* Completion Toggle */}
           {isDueToday && (
             <motion.button
-              onClick={() => toggleHabitCompletion(habit.id)}
+              onClick={() => {
+                toggleHabitCompletion(habit.id);
+                trackCompletionSpeed();
+              }}
               className={cn(
                 "flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center transition-all",
                 isCompleted 
