@@ -37,6 +37,8 @@ export const addXP = (currentStats: UserStats, xpToAdd: number): { newStats: Use
     unlockedRewards: [...currentStats.unlockedRewards, ...newRewards],
     title: getTitleForLevel(level),
     displayName: currentStats.displayName,
+    badges: currentStats.badges || [],
+    lastStreakCheck: currentStats.lastStreakCheck || new Date().toISOString().split('T')[0],
   };
 
   return { newStats, leveledUp, newRewards };

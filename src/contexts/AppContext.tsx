@@ -1,16 +1,20 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { AppState, Habit, Friend, UserStats } from '@/types/habit';
+import { AppState, Habit, Friend, UserStats, Challenge, STREAK_BADGES, HabitReminder } from '@/types/habit';
 import { loadState, saveState, generateId, getTitleForLevel } from '@/utils/storage';
 import { addXP, XP_PER_COMPLETION, getXPForStreak } from '@/utils/xp';
 import { getToday, getCurrentStreak, isHabitDueToday } from '@/utils/dates';
 import { useCompletionSpeedWarning } from '@/hooks/useCompletionSpeedWarning';
+import { useStreakCheck } from '@/hooks/useStreakCheck';
+import { useNotifications } from '@/hooks/useNotifications';
 import confetti from 'canvas-confetti';
+import { toast } from 'sonner';
 
 interface AppContextType {
   state: AppState;
   habits: Habit[];
   userStats: UserStats;
   friends: Friend[];
+  challenges: Challenge[];
   theme: 'light' | 'dark';
   addHabit: (habit: Omit<Habit, 'id' | 'createdAt' | 'completions' | 'xpEarned'>) => void;
   updateHabit: (habit: Habit) => void;
@@ -24,6 +28,7 @@ interface AppContextType {
   getHabitById: (id: string) => Habit | undefined;
   updateDisplayName: (name: string) => void;
   trackCompletionSpeed: () => void;
+  updateHabitReminder: (habitId: string, reminder: HabitReminder) => void;
 }
 
 const AppContext = createContext<AppContextType | null>(null);
@@ -39,6 +44,22 @@ export const useApp = () => {
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [state, setState] = useState<AppState>(loadState);
   const { trackCompletion } = useCompletionSpeedWarning();
+  const { scheduleReminder } = useNotifications();
+
+  // Streak check hook
+  useStreakCheck({
+    habits: state.habits,
+    userStats: state.userStats,
+    onStreakReset: () => {
+      setState(prev => ({
+        ...prev,
+        userStats: {
+          ...prev.userStats,
+          lastStreakCheck: getToday(),
+        },
+      }));
+    },
+  });
 
   // Apply theme on mount and changes
   useEffect(() => {
@@ -50,12 +71,95 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     saveState(state);
   }, [state]);
 
-  const triggerLevelUpCelebration = useCallback(() => {
+  // Schedule reminders on load
+  useEffect(() => {
+    state.habits.forEach(habit => {
+      if (habit.reminder?.enabled) {
+        scheduleReminder(habit);
+      }
+    });
+  }, []);
+
+  const triggerLevelUpCelebration = useCallback((newLevel: number) => {
     confetti({
-      particleCount: 100,
-      spread: 70,
+      particleCount: 150,
+      spread: 100,
       origin: { y: 0.6 },
       colors: ['#10b981', '#8b5cf6', '#f59e0b', '#ef4444', '#3b82f6'],
+    });
+    
+    toast.success(`🎉 Level Up!`, {
+      description: `You've reached Level ${newLevel}! Keep up the amazing work!`,
+      duration: 5000,
+    });
+  }, []);
+
+  const triggerBadgeUnlock = useCallback((badgeName: string, badgeIcon: string) => {
+    confetti({
+      particleCount: 80,
+      spread: 60,
+      origin: { y: 0.5 },
+      colors: ['#fbbf24', '#f59e0b', '#d97706'],
+    });
+    
+    toast.success(`🏆 New Badge Unlocked!`, {
+      description: `${badgeIcon} ${badgeName}`,
+      duration: 5000,
+    });
+  }, []);
+
+  const checkAndAwardBadges = useCallback((habits: Habit[], currentBadges: string[]): string[] => {
+    const newBadges: string[] = [];
+    
+    habits.forEach(habit => {
+      const streak = getCurrentStreak(habit);
+      
+      STREAK_BADGES.forEach(badge => {
+        if (streak >= badge.streak && !currentBadges.includes(badge.id) && !newBadges.includes(badge.id)) {
+          newBadges.push(badge.id);
+          setTimeout(() => {
+            triggerBadgeUnlock(badge.name, badge.icon);
+          }, 500);
+        }
+      });
+    });
+    
+    return newBadges;
+  }, [triggerBadgeUnlock]);
+
+  const updateChallengeProgress = useCallback((state: AppState): Challenge[] => {
+    const today = getToday();
+    
+    return state.challenges.map(challenge => {
+      if (challenge.completed) return challenge;
+      
+      let progress = 0;
+      
+      if (challenge.name.includes('complete') || challenge.name.includes('Complete')) {
+        // Count habit completions
+        progress = state.habits.reduce((sum, habit) => {
+          return sum + Object.entries(habit.completions)
+            .filter(([date]) => date >= challenge.startDate && date <= today)
+            .reduce((total, [, count]) => total + count, 0);
+        }, 0);
+      } else if (challenge.name.includes('streak') || challenge.name.includes('Streak')) {
+        // Get max streak
+        progress = Math.max(...state.habits.map(h => getCurrentStreak(h)), 0);
+      } else if (challenge.name.includes('XP')) {
+        // XP earned in period - simplified
+        progress = state.userStats.totalXP;
+      } else {
+        // Default: count completions
+        progress = state.habits.reduce((sum, habit) => {
+          return sum + Object.entries(habit.completions)
+            .filter(([date]) => date >= challenge.startDate && date <= today)
+            .reduce((total, [, count]) => total + (count > 0 ? 1 : 0), 0);
+        }, 0);
+      }
+      
+      const completed = progress >= challenge.target;
+      
+      return { ...challenge, progress: Math.min(progress, challenge.target), completed };
     });
   }, []);
 
@@ -127,18 +231,45 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       };
 
       const { newStats, leveledUp } = addXP(prev.userStats, xpChange);
+      
+      // Check for new badges
+      const updatedHabits = prev.habits.map(h => h.id === id ? updatedHabit : h);
+      const newBadges = checkAndAwardBadges(updatedHabits, newStats.badges);
 
       if (leveledUp && xpChange > 0) {
-        setTimeout(triggerLevelUpCelebration, 100);
+        setTimeout(() => triggerLevelUpCelebration(newStats.level), 100);
       }
 
-      return {
+      const newState = {
         ...prev,
-        habits: prev.habits.map(h => h.id === id ? updatedHabit : h),
-        userStats: newStats,
+        habits: updatedHabits,
+        userStats: {
+          ...newStats,
+          badges: [...newStats.badges, ...newBadges],
+          lastStreakCheck: today,
+        },
       };
+
+      // Update challenge progress
+      newState.challenges = updateChallengeProgress(newState);
+      
+      // Check for completed challenges
+      newState.challenges.forEach((challenge, idx) => {
+        if (challenge.completed && !prev.challenges[idx]?.completed) {
+          const { newStats: statsWithBonus } = addXP(newState.userStats, challenge.reward);
+          newState.userStats = {
+            ...statsWithBonus,
+            badges: newState.userStats.badges,
+          };
+          toast.success(`🏆 Challenge Complete: ${challenge.name}!`, {
+            description: `+${challenge.reward} XP bonus earned!`,
+          });
+        }
+      });
+
+      return newState;
     });
-  }, [triggerLevelUpCelebration]);
+  }, [triggerLevelUpCelebration, checkAndAwardBadges, updateChallengeProgress]);
 
   const togglePastDay = useCallback((id: string, dateString: string) => {
     setState(prev => {
@@ -160,18 +291,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       };
 
       const { newStats, leveledUp } = addXP(prev.userStats, xpChange);
+      
+      // Check for new badges
+      const updatedHabits = prev.habits.map(h => h.id === id ? updatedHabit : h);
+      const newBadges = checkAndAwardBadges(updatedHabits, newStats.badges);
 
       if (leveledUp && xpChange > 0) {
-        setTimeout(triggerLevelUpCelebration, 100);
+        setTimeout(() => triggerLevelUpCelebration(newStats.level), 100);
       }
 
       return {
         ...prev,
-        habits: prev.habits.map(h => h.id === id ? updatedHabit : h),
-        userStats: newStats,
+        habits: updatedHabits,
+        userStats: {
+          ...newStats,
+          badges: [...newStats.badges, ...newBadges],
+        },
       };
     });
-  }, [triggerLevelUpCelebration]);
+  }, [triggerLevelUpCelebration, checkAndAwardBadges]);
 
   const addFriend = useCallback((name: string, xp: number, level: number) => {
     const newFriend: Friend = {
@@ -179,6 +317,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       name,
       xp,
       level,
+      badges: [],
+      streak: 0,
     };
     setState(prev => ({
       ...prev,
@@ -214,6 +354,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }));
   }, []);
 
+  const updateHabitReminder = useCallback((habitId: string, reminder: HabitReminder) => {
+    setState(prev => ({
+      ...prev,
+      habits: prev.habits.map(h => 
+        h.id === habitId ? { ...h, reminder } : h
+      ),
+    }));
+  }, []);
+
   const getHabitById = useCallback((id: string) => {
     return state.habits.find(h => h.id === id);
   }, [state.habits]);
@@ -224,6 +373,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       habits: state.habits,
       userStats: state.userStats,
       friends: state.friends,
+      challenges: state.challenges || [],
       theme: state.theme,
       addHabit,
       updateHabit,
@@ -237,6 +387,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       getHabitById,
       updateDisplayName,
       trackCompletionSpeed: trackCompletion,
+      updateHabitReminder,
     }}>
       {children}
     </AppContext.Provider>
