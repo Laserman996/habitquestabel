@@ -70,15 +70,67 @@ const Dashboard = () => {
   return (
     <Layout>
       <div className="space-y-6 pb-8">
+        {/* Hero Section */}
+        <motion.section
+          initial={{ opacity: 0, y: -30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="relative text-center py-12 md:py-16 px-4 rounded-3xl bg-gradient-to-br from-primary/10 via-accent/5 to-transparent border border-border overflow-hidden"
+        >
+          {/* Background decorative elements */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <div className="absolute -top-20 -right-20 w-40 h-40 rounded-full bg-primary/20 blur-3xl" />
+            <div className="absolute -bottom-20 -left-20 w-40 h-40 rounded-full bg-accent/20 blur-3xl" />
+          </div>
+          
+          <div className="relative z-10">
+            <motion.h1 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4"
+            >
+              Build Better Habits{' '}
+              <span className="text-gradient-primary">Every Day</span>
+            </motion.h1>
+            
+            <motion.p 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-8"
+            >
+              Track your progress, stay consistent, and level up your routine.
+            </motion.p>
+            
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.4 }}
+            >
+              <Link to="/add">
+                <motion.button
+                  className="inline-flex items-center gap-2 px-8 py-4 rounded-2xl bg-primary text-primary-foreground font-semibold text-lg shadow-lg glow-primary"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Target className="w-5 h-5" />
+                  Start Tracking
+                </motion.button>
+              </Link>
+            </motion.div>
+          </div>
+        </motion.section>
+
         {/* Welcome Section */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           className="text-center md:text-left"
         >
-          <h1 className="text-3xl md:text-4xl font-bold mb-2">
+          <h2 className="text-2xl md:text-3xl font-bold mb-2">
             Welcome back, <span className="text-gradient-primary">{userStats.title}</span>! 
-          </h1>
+          </h2>
           <p className="text-muted-foreground">
             {completedToday === todayHabits.length && todayHabits.length > 0
               ? "🎉 Amazing! You've completed all habits for today!"
