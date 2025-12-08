@@ -69,53 +69,77 @@ const Dashboard = () => {
 
   return (
     <Layout>
-      <div className="space-y-6 pb-8">
+      <div className="space-y-8 pb-8">
         {/* Hero Section */}
         <motion.section
-          initial={{ opacity: 0, y: -30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-          className="relative text-center py-12 md:py-16 px-4 rounded-3xl bg-gradient-to-br from-primary/10 via-accent/5 to-transparent border border-border overflow-hidden"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5 }}
+          className="relative text-center py-16 md:py-20 lg:py-24"
         >
-          {/* Background decorative elements */}
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <div className="absolute -top-20 -right-20 w-40 h-40 rounded-full bg-primary/20 blur-3xl" />
-            <div className="absolute -bottom-20 -left-20 w-40 h-40 rounded-full bg-accent/20 blur-3xl" />
+          {/* Subtle background gradient */}
+          <div className="absolute inset-0 -z-10 overflow-hidden">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] rounded-full bg-primary/5 blur-[100px]" />
           </div>
           
-          <div className="relative z-10">
+          <div className="max-w-3xl mx-auto px-4">
+            {/* Badge */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-sm font-medium text-primary mb-6"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>Gamified habit tracking</span>
+            </motion.div>
+
+            {/* Headline */}
             <motion.h1 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4"
+              className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight mb-6 leading-[1.1]"
             >
-              Build Better Habits{' '}
+              Build Better Habits
+              <br />
               <span className="text-gradient-primary">Every Day</span>
             </motion.h1>
             
+            {/* Subheadline */}
             <motion.p 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-8"
+              className="text-lg md:text-xl text-muted-foreground max-w-xl mx-auto mb-10 leading-relaxed"
             >
-              Track your progress, stay consistent, and level up your routine.
+              Track your progress, stay consistent, and level up your routine with a fun, gamified experience.
             </motion.p>
             
+            {/* CTA Button */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
+              className="flex flex-col sm:flex-row items-center justify-center gap-4"
             >
               <Link to="/add">
                 <motion.button
-                  className="inline-flex items-center gap-2 px-8 py-4 rounded-2xl bg-primary text-primary-foreground font-semibold text-lg shadow-lg glow-primary"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                  className="inline-flex items-center gap-2.5 px-8 py-4 rounded-xl bg-primary text-primary-foreground font-semibold text-base shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-shadow"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                 >
                   <Target className="w-5 h-5" />
                   Start Tracking
+                </motion.button>
+              </Link>
+              <Link to="/leaderboard">
+                <motion.button
+                  className="inline-flex items-center gap-2 px-6 py-4 rounded-xl bg-secondary text-secondary-foreground font-medium text-base hover:bg-secondary/80 transition-colors"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  View Leaderboard
                 </motion.button>
               </Link>
             </motion.div>
@@ -124,34 +148,34 @@ const Dashboard = () => {
 
         {/* Features Section */}
         <motion.section
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
           transition={{ delay: 0.5, duration: 0.5 }}
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
+          className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4"
         >
           {[
             {
               icon: CalendarCheck,
               title: "Daily Tracking",
-              description: "Log your habits each day with a single tap and never miss a beat.",
+              description: "Log habits with a single tap.",
               color: "primary"
             },
             {
               icon: Flame,
               title: "Streak System",
-              description: "Build momentum with streaks that reward your consistency.",
+              description: "Stay consistent, earn rewards.",
               color: "streak"
             },
             {
               icon: BarChart3,
-              title: "Progress Visualization",
-              description: "See your growth with beautiful charts and heatmaps.",
+              title: "Visual Progress",
+              description: "Charts and heatmaps for growth.",
               color: "accent"
             },
             {
               icon: Sparkles,
-              title: "Easy & Fun",
-              description: "Gamified experience makes building habits enjoyable.",
+              title: "Gamified",
+              description: "Level up as you build habits.",
               color: "xp"
             }
           ].map((feature, index) => (
@@ -159,17 +183,20 @@ const Dashboard = () => {
               key={feature.title}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6 + index * 0.1 }}
-              className="p-5 rounded-2xl bg-card border border-border hover:border-primary/30 transition-colors group"
+              transition={{ delay: 0.6 + index * 0.05 }}
+              className="p-4 md:p-5 rounded-xl bg-card border border-border hover:border-primary/20 transition-all group"
             >
-              <div className={`w-12 h-12 rounded-xl bg-${feature.color}/20 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
-                <feature.icon className={`w-6 h-6 text-${feature.color}`} />
+              <div className={`w-10 h-10 md:w-11 md:h-11 rounded-lg bg-${feature.color}/10 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform`}>
+                <feature.icon className={`w-5 h-5 text-${feature.color}`} />
               </div>
-              <h3 className="font-semibold text-lg mb-1">{feature.title}</h3>
-              <p className="text-sm text-muted-foreground">{feature.description}</p>
+              <h3 className="font-semibold text-sm md:text-base mb-1">{feature.title}</h3>
+              <p className="text-xs md:text-sm text-muted-foreground leading-relaxed">{feature.description}</p>
             </motion.div>
           ))}
         </motion.section>
+
+        {/* Divider */}
+        <div className="h-px bg-border" />
 
         {/* Welcome Section */}
         <motion.div
