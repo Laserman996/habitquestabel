@@ -18,30 +18,30 @@ export const Navbar = () => {
   return (
     <>
       {/* Desktop Navbar */}
-      <nav className="hidden md:flex fixed top-0 left-0 right-0 z-50 glass-strong">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+      <nav className="hidden md:flex fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border/50">
+        <div className="container mx-auto px-6 h-16 flex items-center justify-between">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2">
+          <Link to="/" className="flex items-center gap-3">
             <motion.div 
-              className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center"
+              className="w-9 h-9 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              <Zap className="w-5 h-5 text-primary-foreground" />
+              <Zap className="w-4 h-4 text-primary-foreground" />
             </motion.div>
-            <span className="font-bold text-xl">HabitQuest</span>
+            <span className="font-bold text-lg tracking-tight">HabitQuest</span>
           </Link>
 
-          {/* Nav Links */}
-          <div className="flex items-center gap-1">
+          {/* Nav Links - Centered */}
+          <div className="flex items-center gap-1 bg-secondary/50 rounded-xl p-1">
             {navItems.map(item => (
               <Link key={item.path} to={item.path}>
                 <motion.div
                   className={cn(
-                    "px-4 py-2 rounded-xl flex items-center gap-2 transition-colors",
+                    "px-4 py-2 rounded-lg flex items-center gap-2 transition-all text-sm",
                     location.pathname === item.path
-                      ? "bg-primary text-primary-foreground"
-                      : "hover:bg-secondary"
+                      ? "bg-background text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
                   )}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
@@ -54,27 +54,28 @@ export const Navbar = () => {
           </div>
 
           {/* User Stats & Theme Toggle */}
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-secondary">
-              <div className="flex items-center gap-1">
-                <span className="text-xp font-bold">Lvl {userStats.level}</span>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 px-4 py-2 rounded-xl bg-secondary/50">
+              <div className="flex items-center gap-1.5">
+                <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                <span className="text-sm font-semibold">Lvl {userStats.level}</span>
               </div>
               <div className="w-px h-4 bg-border" />
-              <div className="flex items-center gap-1">
-                <Zap className="w-4 h-4 text-xp" />
-                <span className="font-semibold">{userStats.totalXP} XP</span>
+              <div className="flex items-center gap-1.5">
+                <Zap className="w-3.5 h-3.5 text-xp" />
+                <span className="text-sm font-medium text-muted-foreground">{userStats.totalXP} XP</span>
               </div>
             </div>
             <motion.button
               onClick={toggleTheme}
-              className="p-2 rounded-xl bg-secondary hover:bg-secondary/80 transition-colors"
+              className="p-2.5 rounded-xl bg-secondary/50 hover:bg-secondary transition-colors"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
               {theme === 'dark' ? (
-                <Sun className="w-5 h-5 text-xp" />
+                <Sun className="w-4 h-4 text-xp" />
               ) : (
-                <Moon className="w-5 h-5 text-accent" />
+                <Moon className="w-4 h-4 text-muted-foreground" />
               )}
             </motion.button>
           </div>
@@ -105,29 +106,32 @@ export const Navbar = () => {
       </nav>
 
       {/* Mobile Top Bar */}
-      <header className="md:hidden fixed top-0 left-0 right-0 z-50 glass-strong">
+      <header className="md:hidden fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border/50">
         <div className="flex items-center justify-between h-14 px-4">
           <Link to="/" className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
               <Zap className="w-4 h-4 text-primary-foreground" />
             </div>
-            <span className="font-bold text-lg">HabitQuest</span>
+            <span className="font-bold tracking-tight">HabitQuest</span>
           </Link>
           <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1 px-2 py-1 rounded-lg bg-secondary text-sm">
-              <span className="text-xp font-bold">Lvl {userStats.level}</span>
-              <Zap className="w-3 h-3 text-xp" />
-              <span className="font-semibold">{userStats.totalXP}</span>
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-secondary/50 text-sm">
+              <span className="font-semibold">Lvl {userStats.level}</span>
+              <div className="w-px h-3 bg-border" />
+              <div className="flex items-center gap-1">
+                <Zap className="w-3 h-3 text-xp" />
+                <span className="text-muted-foreground">{userStats.totalXP}</span>
+              </div>
             </div>
             <motion.button
               onClick={toggleTheme}
-              className="p-2 rounded-lg bg-secondary"
+              className="p-2 rounded-lg bg-secondary/50"
               whileTap={{ scale: 0.95 }}
             >
               {theme === 'dark' ? (
                 <Sun className="w-4 h-4 text-xp" />
               ) : (
-                <Moon className="w-4 h-4 text-accent" />
+                <Moon className="w-4 h-4 text-muted-foreground" />
               )}
             </motion.button>
           </div>
