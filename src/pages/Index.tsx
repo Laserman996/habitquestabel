@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Search, SlidersHorizontal, Zap, Flame, Target, TrendingUp } from 'lucide-react';
+import { Plus, Search, SlidersHorizontal, Zap, Flame, Target, TrendingUp, CalendarCheck, BarChart3, Sparkles } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { Layout } from '@/components/layout/Layout';
 import { HabitCard } from '@/components/habits/HabitCard';
@@ -120,6 +120,55 @@ const Dashboard = () => {
               </Link>
             </motion.div>
           </div>
+        </motion.section>
+
+        {/* Features Section */}
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5, duration: 0.5 }}
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
+        >
+          {[
+            {
+              icon: CalendarCheck,
+              title: "Daily Tracking",
+              description: "Log your habits each day with a single tap and never miss a beat.",
+              color: "primary"
+            },
+            {
+              icon: Flame,
+              title: "Streak System",
+              description: "Build momentum with streaks that reward your consistency.",
+              color: "streak"
+            },
+            {
+              icon: BarChart3,
+              title: "Progress Visualization",
+              description: "See your growth with beautiful charts and heatmaps.",
+              color: "accent"
+            },
+            {
+              icon: Sparkles,
+              title: "Easy & Fun",
+              description: "Gamified experience makes building habits enjoyable.",
+              color: "xp"
+            }
+          ].map((feature, index) => (
+            <motion.div
+              key={feature.title}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6 + index * 0.1 }}
+              className="p-5 rounded-2xl bg-card border border-border hover:border-primary/30 transition-colors group"
+            >
+              <div className={`w-12 h-12 rounded-xl bg-${feature.color}/20 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
+                <feature.icon className={`w-6 h-6 text-${feature.color}`} />
+              </div>
+              <h3 className="font-semibold text-lg mb-1">{feature.title}</h3>
+              <p className="text-sm text-muted-foreground">{feature.description}</p>
+            </motion.div>
+          ))}
         </motion.section>
 
         {/* Welcome Section */}
