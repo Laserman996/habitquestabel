@@ -1,8 +1,12 @@
-import { Link, useLocation } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Home, Plus, Trophy, Settings, Zap, Sun, Moon } from 'lucide-react';
+import { Home, Plus, Trophy, Settings, Zap, Sun, Moon, LogIn, LogOut, User } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { cn } from '@/lib/utils';
+import { supabase } from '@/integrations/supabase/client';
+import { Button } from '@/components/ui/button';
+import { User as SupabaseUser } from '@supabase/supabase-js';
 
 const navItems = [
   { path: '/', icon: Home, label: 'Home' },
@@ -13,7 +17,26 @@ const navItems = [
 
 export const Navbar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { userStats, theme, toggleTheme } = useApp();
+  const [user, setUser] = useState<SupabaseUser | null>(null);
+
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+  };
 
   return (
     <>
@@ -78,6 +101,29 @@ export const Navbar = () => {
                 <Moon className="w-4 h-4 text-muted-foreground" />
               )}
             </motion.button>
+            
+            {user ? (
+              <motion.button
+                onClick={handleSignOut}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-secondary/50 hover:bg-secondary transition-colors text-sm font-medium"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <LogOut className="w-4 h-4" />
+                <span>Sign Out</span>
+              </motion.button>
+            ) : (
+              <Link to="/auth">
+                <motion.div
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-medium"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <LogIn className="w-4 h-4" />
+                  <span>Sign In</span>
+                </motion.div>
+              </Link>
+            )}
           </div>
         </div>
       </nav>
@@ -134,6 +180,25 @@ export const Navbar = () => {
                 <Moon className="w-4 h-4 text-muted-foreground" />
               )}
             </motion.button>
+            
+            {user ? (
+              <motion.button
+                onClick={handleSignOut}
+                className="p-2 rounded-lg bg-secondary/50"
+                whileTap={{ scale: 0.95 }}
+              >
+                <LogOut className="w-4 h-4 text-muted-foreground" />
+              </motion.button>
+            ) : (
+              <Link to="/auth">
+                <motion.div
+                  className="p-2 rounded-lg bg-primary"
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <User className="w-4 h-4 text-primary-foreground" />
+                </motion.div>
+              </Link>
+            )}
           </div>
         </div>
       </header>
