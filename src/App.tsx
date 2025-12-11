@@ -9,6 +9,7 @@ import AddHabit from "./pages/AddHabit";
 import HabitDetails from "./pages/HabitDetails";
 import Leaderboard from "./pages/Leaderboard";
 import Settings from "./pages/Settings";
+import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,6 +27,7 @@ const App = () => (
             <Route path="/habit/:id" element={<HabitDetails />} />
             <Route path="/leaderboard" element={<Leaderboard />} />
             <Route path="/settings" element={<Settings />} />
+            <Route path="/auth" element={<Auth />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
